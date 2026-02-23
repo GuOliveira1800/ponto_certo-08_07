@@ -1,0 +1,10 @@
+cat > /projetos/pontoCerto/frontend/nixpacks.toml << 'EOF'
+[phases.setup]
+cmds = ["corepack enable"]
+
+[phases.build]
+cmds = ["yarn install", "yarn build"]
+
+[start]
+cmd = "npx serve dist -p $PORT"
+EOF
