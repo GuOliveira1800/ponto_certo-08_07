@@ -1,0 +1,14 @@
+[phases.setup]
+cmds = [
+  "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash",
+  "export NVM_DIR=$HOME/.nvm && . $NVM_DIR/nvm.sh && nvm install 22.13.0 && nvm use 22.13.0"
+]
+
+[phases.install]
+cmds = ["export NVM_DIR=$HOME/.nvm && . $NVM_DIR/nvm.sh && yarn install --ignore-engines"]
+
+[phases.build]
+cmds = ["export NVM_DIR=$HOME/.nvm && . $NVM_DIR/nvm.sh && yarn build"]
+
+[start]
+cmd = "npx serve dist -p $PORT"
