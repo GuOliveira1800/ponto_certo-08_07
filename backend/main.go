@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"pontoCerto/config"
 	"pontoCerto/database"
@@ -23,6 +25,7 @@ func main() {
 
 	// Rotas públicas
 	mux.HandleFunc("/auth/google", authHandler.GoogleLogin)
+	mux.HandleFunc("/auth/google/completar-cadastro", authHandler.CompletarCadastro)
 
 	// Rotas protegidas
 	protected := http.NewServeMux()
@@ -35,15 +38,33 @@ func main() {
 		http.StripPrefix("/api", protected),
 	))
 
-	mux.HandleFunc("/auth/google/completar-cadastro", authHandler.CompletarCadastro)
-
 	log.Printf("Servidor rodando na porta %s", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, corsMiddleware(mux)))
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
+	// Lê origens permitidas da variável de ambiente ALLOWED_ORIGINS
+	// Exemplo: "https://meusite.up.railway.app,http://localhost:5173"
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+
+	origins := map[string]bool{}
+	for _, o := range strings.Split(allowedOrigins, ",") {
+		o = strings.TrimSpace(o)
+		if o != "" {
+			origins[o] = true
+		}
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		origin := r.Header.Get("Origin")
+
+		if origins[origin] {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		} else if len(origins) == 0 {
+			// Se não configurou nada, permite tudo (fallback dev)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
