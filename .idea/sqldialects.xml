@@ -3,7 +3,5 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/backend/database/migration/000005_create_perfil_usuario.down.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/backend/database/migration/000005_create_perfil_usuario.up.sql" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/backend/database/migration/000006_create_usuario_primeiro_acesso_down.sql" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/backend/database/migration/000006_create_usuario_primeiro_acesso_up.sql" dialect="GenericSQL" />
   </component>
 </project>
