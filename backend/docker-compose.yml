@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pontocerto-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: pontocerto
+    ports:
+      - "5432:5432"
+    volumes:
+      - pontocerto_data:/var/lib/postgresql/data
+
+volumes:
+  pontocerto_data:

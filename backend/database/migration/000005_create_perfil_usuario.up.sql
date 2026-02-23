@@ -1,0 +1,1 @@
+ALTER TABLE usuarios ADD COLUMN perfil VARCHAR(20) DEFAULT 'funcionario';
