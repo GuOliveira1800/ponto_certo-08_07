@@ -9,10 +9,9 @@ import (
 )
 
 func RunMigrations(databaseURL string) {
-	// Converte o formato do GORM para o formato do migrate
 	m, err := migrate.New(
-		"file://database/migrations",
-		"postgres://"+extractDSN(databaseURL),
+		"file:///app/database/migrations", // caminho absoluto no container
+		databaseURL,                       // DATABASE_URL direto, sem o extractDSN
 	)
 	if err != nil {
 		log.Fatalf("Erro ao inicializar migrations: %v", err)
@@ -23,7 +22,7 @@ func RunMigrations(databaseURL string) {
 		log.Fatalf("Erro ao executar migrations: %v", err)
 	}
 
-	log.Println("Migrations de produção executadas com sucesso!")
+	log.Println("Migrations executadas com sucesso!")
 }
 
 // Converte "host=x port=x user=x ..." para "x:senha@localhost:5432/dbname"
