@@ -25,7 +25,9 @@ func main() {
 
 	// Rotas públicas
 	mux.HandleFunc("/auth/google", authHandler.GoogleLogin)
-	mux.HandleFunc("/auth/google/completar-cadastro", authHandler.CompletarCadastro)
+	mux.HandleFunc("/auth/completar-cadastro", authHandler.CompletarCadastro)
+	mux.HandleFunc("/auth/login", authHandler.Login)
+	mux.HandleFunc("/auth/register", authHandler.Register)
 
 	// Rotas protegidas
 	protected := http.NewServeMux()

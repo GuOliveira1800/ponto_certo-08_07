@@ -14,12 +14,14 @@ export interface PrimeiroAcessoData {
     picture: string
     cargo: string
     departamento: string
-    google_id: string
+    google_id: string  // vazio "" quando veio de login por senha
 }
 
 interface AuthContextType {
     user: User | null
     loginWithGoogle: (googleToken: string) => Promise<{ primeiro_acesso: boolean; dados?: PrimeiroAcessoData }>
+    loginWithCredentials: (username: string, password: string) => Promise<{ primeiro_acesso: boolean; dados?: PrimeiroAcessoData }>
+    registerWithCredentials: (username: string, password: string) => Promise<void>
     completarCadastro: (dados: {
         email: string
         google_id: string
@@ -46,12 +48,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
 
         if (data.primeiro_acesso) {
-            return { primeiro_acesso: true, dados: data as PrimeiroAcessoData }
+            return { primeiro_acesso: true, dados: data.dados as PrimeiroAcessoData }
         }
 
         setUser(data)
         localStorage.setItem('user', JSON.stringify(data))
         return { primeiro_acesso: false }
+    }
+
+    async function loginWithCredentials(username: string, password: string): Promise<{ primeiro_acesso: boolean; dados?: PrimeiroAcessoData }> {
+        const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
+            username,
+            password,
+        })
+
+        if (data.primeiro_acesso) {
+            return { primeiro_acesso: true, dados: data.dados as PrimeiroAcessoData }
+        }
+
+        setUser(data)
+        localStorage.setItem('user', JSON.stringify(data))
+        return { primeiro_acesso: false }
+    }
+
+    async function registerWithCredentials(username: string, password: string): Promise<void> {
+        await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
+            username,
+            password,
+        })
     }
 
     async function completarCadastro(dados: {
@@ -64,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dt_nascimento: string
     }) {
         const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL}/auth/google/completar-cadastro`,
+            `${import.meta.env.VITE_API_URL}/auth/completar-cadastro`,
             dados
         )
         setUser(data)
@@ -77,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loginWithGoogle, completarCadastro, logout }}>
+        <AuthContext.Provider value={{ user, loginWithGoogle, loginWithCredentials, registerWithCredentials, completarCadastro, logout }}>
             {children}
         </AuthContext.Provider>
     )

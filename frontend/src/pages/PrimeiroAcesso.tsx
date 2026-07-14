@@ -17,7 +17,7 @@ export default function PrimeiroAcesso() {
     const location = useLocation()
     const navigate = useNavigate()
     const { completarCadastro } = useAuth()
-    const dados = location.state as PrimeiroAcessoData
+    const dados = location.state as PrimeiroAcessoData | null
 
     const [form, setForm] = useState({
         nome: '',
@@ -26,9 +26,9 @@ export default function PrimeiroAcesso() {
         dt_nascimento: '',
     })
     const [loading, setLoading] = useState(false)
-    console.log('state recebido:', location.state)
-    // Se chegou aqui sem os dados do state, redireciona para login
-    if (!dados.google_id) {
+
+    // Sem state → volta para login (não depende mais só do google_id)
+    if (!dados || (!dados.google_id && !dados.email && !dados.name)) {
         navigate('/login')
         return null
     }
@@ -52,11 +52,10 @@ export default function PrimeiroAcesso() {
 
         setLoading(true)
         try {
-            console.log("Dados: ",dados)
             await completarCadastro({
                 email: dados.email,
-                google_id: dados.google_id,  // precisa vir no state
-                picture: dados.picture,
+                google_id: dados.google_id ?? '',  // vazio para login por senha
+                picture: dados.picture ?? '',
                 nome: form.nome,
                 sobrenome: form.sobrenome,
                 cpf: form.cpf.replace(/\D/g, ''),
@@ -70,6 +69,9 @@ export default function PrimeiroAcesso() {
             setLoading(false)
         }
     }
+
+    // Para login por senha, picture pode ser vazio — exibe avatar placeholder
+    const hasPicture = !!dados.picture
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -85,17 +87,27 @@ export default function PrimeiroAcesso() {
                     <p className="text-sm text-muted-foreground">Complete seu cadastro para continuar</p>
                 </div>
 
-                {/* Info do usuário Google */}
+                {/* Info do usuário */}
                 <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
-                    <img src={dados.picture} alt={dados.name} className="w-9 h-9 rounded-full" />
+                    {hasPicture ? (
+                        <img src={dados.picture} alt={dados.name} className="w-9 h-9 rounded-full" />
+                    ) : (
+                        <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary">
+                            {dados.name?.charAt(0).toUpperCase() ?? '?'}
+                        </div>
+                    )}
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{dados.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{dados.email}</p>
+                        {dados.email && (
+                            <p className="text-xs text-muted-foreground truncate">{dados.email}</p>
+                        )}
                     </div>
-                    <div className="ml-auto text-right shrink-0">
-                        <p className="text-xs font-medium text-foreground">{dados.cargo}</p>
-                        <p className="text-xs text-muted-foreground">{dados.departamento}</p>
-                    </div>
+                    {(dados.cargo || dados.departamento) && (
+                        <div className="ml-auto text-right shrink-0">
+                            {dados.cargo && <p className="text-xs font-medium text-foreground">{dados.cargo}</p>}
+                            {dados.departamento && <p className="text-xs text-muted-foreground">{dados.departamento}</p>}
+                        </div>
+                    )}
                 </div>
 
                 {/* Formulário */}

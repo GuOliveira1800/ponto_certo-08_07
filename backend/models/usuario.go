@@ -12,10 +12,12 @@ const (
 
 type Usuario struct {
 	ID           uint          `gorm:"primaryKey;autoIncrement" json:"id"`
-	PessoaID     uint          `gorm:"not null;index" json:"pessoa_id"`
+	PessoaID     uint          `gorm:"default:0;index" json:"pessoa_id"` // 0 = cadastro incompleto
 	Pessoa       Pessoa        `gorm:"foreignKey:PessoaID" json:"pessoa,omitempty"`
-	GoogleID     string        `gorm:"type:varchar(100);uniqueIndex;not null" json:"google_id"`
-	Email        string        `gorm:"type:varchar(150);uniqueIndex;not null" json:"email"`
+	GoogleID     string        `gorm:"type:varchar(100);uniqueIndex;default:''" json:"google_id"`
+	Username     string        `gorm:"type:varchar(100);uniqueIndex;default:''" json:"username"` // login por senha
+	PasswordHash string        `gorm:"type:varchar(255);default:''" json:"-"`                    // nunca expõe no JSON
+	Email        string        `gorm:"type:varchar(150);uniqueIndex;default:''" json:"email"`
 	Foto         string        `gorm:"type:varchar(500)" json:"foto"`
 	Cargo        string        `gorm:"type:varchar(100)" json:"cargo"`
 	Departamento string        `gorm:"type:varchar(100)" json:"departamento"`
